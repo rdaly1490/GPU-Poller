@@ -18,6 +18,7 @@ class GPUPoller {
     this.poller = null;
     this.twilioClient = new twilio(ACCOUNT_SID, AUTH_TOKEN);
     this.IDsMessageSentFor = [];
+    this.lastResults = [];
   }
 
   beginPolling() {
@@ -32,6 +33,7 @@ class GPUPoller {
     if (!this.poller) return;
     clearInterval(this.poller);
     this.poller = null;
+    this.clearLastResults();
     console.log("Poller Removed");
   }
 
@@ -66,7 +68,7 @@ class GPUPoller {
   }
 
   handleNetworkError(e) {
-    this.logTimestamp();
+    console.log(this.getTimestamp());
     console.log(
       `An error has occurred and polling has been interrupted. Error: ${JSON.stringify(
         error
@@ -76,28 +78,39 @@ class GPUPoller {
     this.sendTextMessage("Polling has stopped, check server logs.");
   }
 
-  logTimestamp() {
-    console.log(moment().format("ddd MMM DD YYYY hh:mm A"));
+  getTimestamp() {
+    return moment().format("ddd MMM DD YYYY hh:mm A");
   }
 
   analyzeNetworkResponse(gpus) {
-    this.logTimestamp();
+    const timeStamp = this.getTimestamp();
+    this.clearLastResults();
+    this.logAndStoreMessage(timeStamp);
     gpus.forEach(gpu => {
       const description = this.GPUDescription(gpu.id);
       const inventoryStatus = gpu.inventoryStatus.productIsInStock;
       if (inventoryStatus === "true") {
         const inStockMessage = `${description} IS IN STOCK! Price: ${gpu.pricing
           .formattedListPrice}`;
-        console.log(inStockMessage.green);
+        this.logAndStoreMessage(inStockMessage, "green");
 
         // To stop from getting duplicate text messages
         if (!this.IDsMessageSentFor.includes(gpu.id)) {
           this.sendTextMessage(inStockMessage, gpu.id);
         }
       } else {
-        console.log(`${description} is not in stock`.red);
+        this.logAndStoreMessage(`${description} is not in stock`, "red");
       }
     });
+  }
+
+  clearLastResults() {
+    this.lastResults = [];
+  }
+
+  logAndStoreMessage(msg, msgTreatment = "white") {
+    console.log(msg[msgTreatment]);
+    this.lastResults.push(msg);
   }
 
   GPUDescription(id) {

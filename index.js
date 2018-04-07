@@ -12,7 +12,10 @@ let isPolling;
 
 app.get("/", (req, res) => {
   const status = isPolling ? "up and running" : "down";
-  res.send(`<h1>Poller is ${status}...</h1>`);
+  res.send(
+    `<h1>Poller is ${status}...</h1>
+    ${Helpers.getHTMLForLastPoll(gpuPoller.lastResults)}`
+  );
 });
 
 app.get("/start-poller", (req, res) => {
