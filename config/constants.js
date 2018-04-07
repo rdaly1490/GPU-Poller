@@ -1,8 +1,9 @@
 const PORT = process.env.PORT || 3000;
-const POLLING_INTERVAL = 2000;
+const POLLING_INTERVAL = 60000 * 5; // Every 5 min
 const URL_SEGMENT =
   "https://api.digitalriver.com/v1/shoppers/me/products?callback=jQuery111205399776325341743_1522978283981&format=json&expand=all&locale=en_us&apiKey=9485fa7b159e42edb08a83bde0d83dia&currency=USD";
 const GPU_LIST = [
+  // This is periodically in stock so it can be useful to test with
   // {
   //   productId: 5094274700,
   //   description: "NVIDIA Titan XP"
