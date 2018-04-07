@@ -1,11 +1,14 @@
 const express = require("express");
 
 const GPUPoller = require("./gpuPoller");
+const Helpers = require("./helpers");
 const { GPU_LIST, PORT } = require("./config");
+
+const ERROR_MSG = "<h1>An Error Occurred. Please check server logs.</h1>";
 
 const app = express();
 const gpuPoller = new GPUPoller(GPU_LIST);
-let isPolling = false;
+let isPolling;
 
 app.get("/", (req, res) => {
   const status = isPolling ? "up and running" : "down";
@@ -13,31 +16,33 @@ app.get("/", (req, res) => {
 });
 
 app.get("/start-poller", (req, res) => {
-  try {
-    gpuPoller.beginPolling();
-  } catch (e) {
-    console.log(e);
-    res.send("<h1>An Error Occurred. Please check server logs.</h1>");
-    return;
+  const isSuccessful = Helpers.safelyExecuteFunction(
+    gpuPoller.beginPolling.bind(this)
+  );
+  if (isSuccessful) {
+    const msg = isPolling
+      ? "<h1>Poller Already Running</h1>"
+      : "<h1>Poller Successfully Started</h1>";
+    res.send(msg);
+    isPolling = true;
+  } else {
+    res.send(ERROR_MSG);
   }
-
-  isPolling = true;
-  res.send("<h1>Poller Successfully Started</h1>");
 });
 
 app.get("/stop-poller", (req, res) => {
-  try {
-    gpuPoller.cancelPolling();
-  } catch (e) {
-    console.log(e);
-    res.send(
-      "<h1>An Error Occurred When Stopping The Poller. Please check server logs.</h1>"
-    );
-    return;
+  const isSuccessful = Helpers.safelyExecuteFunction(
+    gpuPoller.cancelPolling.bind(this)
+  );
+  if (isSuccessful) {
+    const msg = isPolling
+      ? "<h1>Poller Successfully Stopped</h1>"
+      : "<h1>No Poller Running To Stop</h1>";
+    res.send(msg);
+    isPolling = false;
+  } else {
+    res.send(ERROR_MSG);
   }
-
-  isPolling = false;
-  res.send("<h1>Poller Successfully Stopped</h1>");
 });
 
 app.get("/reset-message-records", (req, res) => {
@@ -49,4 +54,10 @@ app.get("/reset-message-records", (req, res) => {
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+
+  // When server starts up or if it restarts try to begin polling
+  const isSuccessful = Helpers.safelyExecuteFunction(
+    gpuPoller.beginPolling.bind(this)
+  );
+  isPolling = isSuccessful;
 });
