@@ -11,3 +11,5 @@ AUTH_TOKEN
 ```
 
 Also, running `npm start` will kick up a basic express server on port 3000.  Check out the routes in index.js to do things like start the poller, stop the poller, check the poller's status, and to reset the list of Product IDs a text message has been sent for.
+
+The goal down the road will be to make this more flexible and to be more of a generic poller to handle any endpoint via callback methods provided to the class.  That's a problem for future Rob though.
