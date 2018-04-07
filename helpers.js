@@ -1,8 +1,8 @@
 class Helpers {
-  static safelyExecuteFunction(cb) {
+  static safelyExecuteFunction(gpuPoller, fnName) {
     let successfullyExecuted = true;
     try {
-      cb();
+      gpuPoller[fnName]();
     } catch (e) {
       console.log(e);
       successfullyExecuted = false;

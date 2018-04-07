@@ -16,9 +16,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/start-poller", (req, res) => {
-  const isSuccessful = Helpers.safelyExecuteFunction(
-    gpuPoller.beginPolling.bind(this)
-  );
+  const isSuccessful = Helpers.safelyExecuteFunction(gpuPoller, "beginPolling");
   if (isSuccessful) {
     const msg = isPolling
       ? "<h1>Poller Already Running</h1>"
@@ -32,7 +30,8 @@ app.get("/start-poller", (req, res) => {
 
 app.get("/stop-poller", (req, res) => {
   const isSuccessful = Helpers.safelyExecuteFunction(
-    gpuPoller.cancelPolling.bind(this)
+    gpuPoller,
+    "cancelPolling"
   );
   if (isSuccessful) {
     const msg = isPolling
@@ -56,8 +55,6 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 
   // When server starts up or if it restarts try to begin polling
-  const isSuccessful = Helpers.safelyExecuteFunction(
-    gpuPoller.beginPolling.bind(this)
-  );
+  const isSuccessful = Helpers.safelyExecuteFunction(gpuPoller, "beginPolling");
   isPolling = isSuccessful;
 });
