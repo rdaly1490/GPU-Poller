@@ -47,6 +47,15 @@ app.get("/stop-poller", (req, res) => {
   }
 });
 
+app.get("/message-records", (req, res) => {
+  const listItems = gpuPoller.IDsMessageSentFor.reduce((str, id) => {
+    const correspondingGPU =
+      GPU_LIST.filter(gpu => gpu.productId === id)[0] || {};
+    return (str += `<li>${correspondingGPU.description || "Unknown"}</li>`);
+  }, "");
+  res.send(`<h1>Current Message Sent Records</h1><ul>${listItems}</ul>`);
+});
+
 app.get("/reset-message-records", (req, res) => {
   gpuPoller.IDsMessageSentFor = [];
   res.send(

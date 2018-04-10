@@ -99,9 +99,18 @@ class GPUPoller {
           this.sendTextMessage(inStockMessage, gpu.id);
         }
       } else {
+        this.removeIfInMessageHisory(gpu.id); // The product may have sold out since being in stock
         this.logAndStoreMessage(`${description} is not in stock`, "red");
       }
     });
+  }
+
+  removeIfInMessageHisory(id) {
+    const index = this.IDsMessageSentFor.indexOf(id);
+    if (index >= 0) {
+      // Ensure we're notified when the product comes back in stock
+      this.IDsMessageSentFor.splice(index, 1);
+    }
   }
 
   clearLastResults() {
